@@ -30,4 +30,14 @@ npm run desktop:build
 
 构建产物位于 `target/release/bundle/`。Windows 可以运行 `npm run desktop:build -- --bundles msi` 生成 MSI 安装包。
 
+## 发布版本
+
+将 `package.json`、`src-tauri/tauri.conf.json` 和 `src-tauri/Cargo.toml` 的版本号保持一致，推送代码并创建对应的 `v<版本号>` 标签（例如 `v0.1.3`）。随后在 GitHub 上基于该标签发布 Release。发布后，GitHub Actions 会自动构建并把 macOS（Apple Silicon 和 Intel）的 DMG、Windows x64 的 MSI、Linux x64 的 DEB 和 AppImage 上传到该 Release 的 Assets。版本号不一致时工作流会停止构建。
+
+macOS 安装包目前没有签名和公证，首次打开可能需要在系统设置中手动允许运行。
+
 macOS 扫描结果已与原版工具对照，Windows 的 Chromium blockfile 缓存已在 Any Listen 0.10.1-beta.5 上验证。其他版本和 Linux 缓存格式仍需实机验证。
+
+## 开源协议
+
+本项目采用 [MIT 协议](LICENSE)。
