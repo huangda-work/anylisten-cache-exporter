@@ -1,0 +1,16 @@
+[package]
+name = "anylisten-desktop"
+version = "0.1.3"
+edition = "2021"
+build = "build.rs"
+
+[dependencies]
+anylisten-core = { path = "../core" }
+open = "5"
+reqwest = { version = "0.12", default-features = false, features = ["blocking", "rustls-tls"] }
+serde = { version = "1", features = ["derive"] }
+tauri = { version = "2.12.7", features = [] }
+tauri-plugin-dialog = "2.8.4"
+
+[build-dependencies]
+tauri-build = { version = "2.7.6", features = [] }

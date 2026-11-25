@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Any Listen 缓存导出</title>
+    <link rel="stylesheet" href="/style.css" />
+    <script type="module" src="/app.js"></script>
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="topbar">
+        <div class="brand">
+          <img src="/app-icon.png" alt="" width="34" height="34" />
+          <div><h1>Any Listen缓存导出</h1><p id="appVersion" class="app-version" hidden></p></div>
+        </div>
+        <div class="top-actions">
+          <button class="icon-button" id="settingsButton" type="button" title="数据目录" aria-label="数据目录"><i data-lucide="settings-2"></i></button>
+          <button class="icon-button" id="refreshButton" type="button" title="刷新音乐" aria-label="刷新音乐"><i data-lucide="refresh-cw"></i></button>
+        </div>
+      </header>
+      <section class="toolbar" aria-label="音乐筛选">
+        <div class="totals"><strong id="cachedCount">0</strong> 首已缓存 <span class="dot"></span> <strong id="remoteCount">0</strong> 首需联网 <span id="unavailableCount" class="unavailable" hidden></span></div>
+        <div class="toolbar-controls">
+          <div class="segments" role="group" aria-label="来源">
+            <button type="button" data-source="all" aria-pressed="true">全部</button>
+            <button type="button" data-source="cached" aria-pressed="false">已缓存</button>
+            <button type="button" data-source="remote" aria-pressed="false">需联网</button>
+          </div>
+          <label class="search-field"><i data-lucide="search"></i><input id="searchInput" type="search" placeholder="搜索歌曲或歌手" autocomplete="off" aria-label="搜索歌曲或歌手" /></label>
+        </div>
+      </section>
+      <div id="notice" class="notice" role="alert" hidden><i data-lucide="circle-alert"></i><span id="noticeText"></span></div>
+      <main class="library">
+        <div class="table-heading" aria-hidden="true"><span></span><span>歌曲</span><span class="size-column">大小</span><span class="format-column">格式</span><span title="状态仅针对当前保存目录">此目录状态</span><span></span><span></span></div>
+        <div id="trackList" class="track-list"></div>
+        <div id="emptyState" class="empty-state" hidden><i data-lucide="music-2"></i><strong id="emptyTitle">目前没有可导出的音乐</strong></div>
+      </main>
+      <footer class="footer">
+        <div id="previewBar" class="preview-bar" role="region" aria-label="试听播放器" hidden>
+          <button id="previewToggleButton" class="icon-button preview-toggle" type="button" title="暂停试听" aria-label="暂停试听"><i data-lucide="pause"></i></button>
+          <div class="preview-info"><strong id="previewTitle"></strong><span id="previewArtist"></span></div>
+          <label for="previewSeek" class="visually-hidden">试听进度</label>
+          <input id="previewSeek" class="preview-seek" type="range" min="0" max="1" step="0.1" value="0" disabled />
+          <span id="previewTime" class="preview-time">0:00 / 0:00</span>
+          <button id="previewCloseButton" class="icon-button preview-close" type="button" title="结束试听" aria-label="结束试听"><i data-lucide="x"></i></button>
+          <audio id="previewAudio" preload="none" hidden></audio>
+        </div>
+        <div class="footer-summary"><span id="selectedCount">已选 0 首</span><span id="selectionBreakdown" class="selection-breakdown" hidden></span></div>
+        <div class="footer-row">
+          <div class="selection-controls"><button type="button" id="selectAllButton" class="text-button">全选</button><button type="button" id="selectUnsavedButton" class="text-button" title="只选择确认未保存在当前目录的歌曲">只选未保存</button></div>
+          <div class="destination"><span class="destination-label">保存到</span><span id="outputPath" class="output-path" title="">首次保存时选择目录</span><button id="chooseOutputButton" class="icon-button" type="button" title="选择保存目录" aria-label="选择保存目录"><i data-lucide="folder-plus"></i></button><button id="openOutputButton" class="icon-button" type="button" title="打开保存目录" aria-label="打开保存目录"><i data-lucide="folder-open"></i></button></div>
+          <div class="export-actions"><button id="cancelButton" class="secondary-button" type="button" hidden>取消</button><button id="exportButton" class="primary-button" type="button"><i data-lucide="download"></i><span>导出所选</span></button></div>
+        </div>
+        <div id="progressArea" class="progress-area" hidden><span id="progressText"></span><progress id="progressBar" max="1" value="0"></progress><span id="progressCount"></span></div>
+      </footer>
+    </div>
+    <div id="activityNotice" class="activity-toast" popover="manual" role="region" aria-label="操作提示" hidden><span id="activityText"></span><button id="dismissActivityButton" class="icon-button" type="button" title="关闭提示" aria-label="关闭提示"><i data-lucide="x" aria-hidden="true"></i></button></div>
+    <div id="activityAnnouncement" class="visually-hidden" role="status" aria-live="polite" aria-atomic="true"></div>
+    <dialog id="settingsDialog" class="app-dialog">
+      <div class="dialog-heading"><h2>数据目录</h2><button id="closeSettingsButton" class="icon-button" type="button" title="关闭" aria-label="关闭"><i data-lucide="x"></i></button></div>
+      <div class="dialog-body"><span class="field-label">当前目录</span><p id="dataRootPath" class="path-value">自动查找</p><p id="settingsError" class="dialog-error" role="alert" hidden></p></div>
+      <div class="dialog-actions"><button id="autoDataRootButton" class="secondary-button" type="button">自动查找</button><button id="chooseDataRootButton" class="primary-button" type="button"><i data-lucide="folder-open"></i>选择目录</button></div>
+    </dialog>
+    <dialog id="failuresDialog" class="app-dialog" aria-labelledby="failuresTitle">
+      <div class="dialog-heading"><h2 id="failuresTitle">导出结果</h2><button id="closeFailuresButton" class="icon-button" type="button" title="关闭" aria-label="关闭"><i data-lucide="x"></i></button></div>
+      <div id="failureList" class="failure-list"></div>
+      <div class="dialog-actions"><button id="retryFailuresButton" class="secondary-button" type="button"><i data-lucide="refresh-cw"></i>重试失败</button><button id="acknowledgeFailuresButton" class="primary-button" type="button" autofocus>确定</button></div>
+    </dialog>
+  </body>
+</html>
