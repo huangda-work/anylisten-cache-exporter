@@ -56,7 +56,14 @@ svg { width: 17px; height: 17px; stroke-width: 1.9; flex: none; }
 .track-row:hover { background: #f8fafb; }
 .track-row:focus-within { background: #f6fafb; }
 .track-checkbox { display: grid; place-items: center; width: 20px; height: 40px; }
-.track-checkbox input { width: 16px; height: 16px; margin: 0; accent-color: #e27d5d; }
+.track-checkbox input { appearance: none; display: grid; place-items: center; width: 16px; height: 16px; margin: 0; border: 1px solid #778b93; border-radius: 4px; background: #fff; cursor: pointer; }
+.track-checkbox input:checked { border-color: #b85e43; background: #b85e43; }
+.track-checkbox input:checked::after { content: ""; width: 8px; height: 5px; border: solid #fff; border-width: 0 0 2px 2px; transform: translateY(-1px) rotate(-45deg); }
+.track-checkbox input:disabled { cursor: default; opacity: .46; }
+@media (forced-colors: active) {
+  .track-checkbox input:checked { forced-color-adjust: none; border-color: Highlight; background: Highlight; }
+  .track-checkbox input:checked::after { border-color: HighlightText; }
+}
 .track-info { display: flex; flex-direction: column; justify-content: center; min-width: 0; gap: 3px; }
 .track-title { overflow: hidden; color: #27363d; font-size: 13px; font-weight: 600; text-overflow: ellipsis; white-space: nowrap; }
 .track-artist { overflow: hidden; color: #687c83; font-size: 12px; text-overflow: ellipsis; white-space: nowrap; }
