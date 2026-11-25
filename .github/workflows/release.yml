@@ -89,3 +89,20 @@ jobs:
           releaseId: ${{ github.event.release.id }}
           uploadUpdaterJson: false
           args: --target ${{ matrix.target }} --bundles ${{ matrix.bundles }} --ci
+
+      - name: Upload Windows portable ZIP
+        if: runner.os == 'Windows'
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
+          BUILD_TARGET: ${{ matrix.target }}
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $binary = "target/$env:BUILD_TARGET/release/anylisten-desktop.exe"
+          if (-not (Test-Path -LiteralPath $binary -PathType Leaf)) {
+            throw "Windows executable not found: $binary"
+          }
+          $archive = "AnyListen-Cache-Exporter_$($env:RELEASE_TAG)_windows-x64-portable.zip"
+          Compress-Archive -LiteralPath $binary -DestinationPath $archive
+          gh release upload $env:RELEASE_TAG $archive --repo $env:GITHUB_REPOSITORY --clobber

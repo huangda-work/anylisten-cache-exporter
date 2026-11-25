@@ -32,7 +32,9 @@ npm run desktop:build
 
 ## 发布版本
 
-将 `package.json`、`src-tauri/tauri.conf.json` 和 `src-tauri/Cargo.toml` 的版本号保持一致，推送代码并创建对应的 `v<版本号>` 标签（例如 `v0.1.3`）。随后在 GitHub 上基于该标签发布 Release。发布后，GitHub Actions 会自动构建并把 macOS（Apple Silicon 和 Intel）的 DMG、Windows x64 的 MSI、Linux x64 的 DEB 和 AppImage 上传到该 Release 的 Assets。版本号不一致时工作流会停止构建。
+将 `package.json`、`src-tauri/tauri.conf.json` 和 `src-tauri/Cargo.toml` 的版本号保持一致，推送代码并创建对应的 `v<版本号>` 标签（例如 `v0.1.3`）。随后在 GitHub 上基于该标签发布 Release。发布后，GitHub Actions 会自动构建并把 macOS（Apple Silicon 和 Intel）的 DMG、Windows x64 的 MSI 与免安装 ZIP、Linux x64 的 DEB 和 AppImage 上传到该 Release 的 Assets。版本号不一致时工作流会停止构建。
+
+Windows 免安装版解压后可直接运行其中的 `.exe`，无需安装 MSI；系统仍需具备 WebView2 Runtime，程序设置会保存在用户的 AppData 中。
 
 macOS 安装包目前没有签名和公证，首次打开可能需要在系统设置中手动允许运行。
 
