@@ -9,6 +9,7 @@ import {
 } from "lucide";
 import { filterTracks, reconcileSelection, toggleVisibleSelection, selectionSummary, selectOnlyUnsaved, retryFailedIds } from "./state.js";
 import { createPreviewController } from "./player.js";
+import { activeLyricIndex, parseLyrics } from "./lyrics.js";
 
 const icons = {
   Settings2, RefreshCw, Search, CircleAlert, Music2, FolderPlus,
@@ -28,6 +29,10 @@ let activityVersion = 0;
 let activityFocusReturn;
 let preview;
 let renderedPreviewTrackId = null;
+let lyricRequest = 0;
+let lyricLines = [];
+let lyricTimed = false;
+let activeLyricLine = -1;
 const previewButtons = new Map();
 let failedTrackIds = [];
 
@@ -149,6 +154,8 @@ function updatePreviewButton(button, track) {
 
 function renderPreview() {
   const state = preview.state;
+  const trackId = state.track?.id || null;
+  if (trackId !== renderedPreviewTrackId) loadLyrics(trackId);
   $("previewBar").hidden = !state.track;
   if (state.track) {
     $("previewTitle").textContent = state.track.title;
@@ -181,7 +188,60 @@ function renderPreview() {
     changed ||= old !== button.dataset.icon;
   }
   renderedPreviewTrackId = currentId;
+  updateLyrics(state.currentTime);
   if (changed || toggle.querySelector("i[data-lucide]")) createIcons({ icons });
+}
+
+function loadLyrics(trackId) {
+  const request = ++lyricRequest;
+  const details = $("lyricsDetails");
+  details.hidden = !trackId;
+  lyricLines = [];
+  lyricTimed = false;
+  activeLyricLine = -1;
+  $("lyricsContent").textContent = "读取中";
+  if (!trackId) return;
+  invoke("get_cached_lyrics", { id: trackId }).then((text) => {
+    if (request !== lyricRequest) return;
+    const parsed = parseLyrics(text);
+    lyricLines = parsed.lines;
+    lyricTimed = parsed.timed;
+    const content = $("lyricsContent");
+    content.replaceChildren();
+    if (!lyricLines.length) {
+      content.textContent = "本地没有歌词";
+      return;
+    }
+    const fragment = document.createDocumentFragment();
+    for (const line of lyricLines) {
+      const paragraph = document.createElement("p");
+      paragraph.textContent = line.text;
+      fragment.append(paragraph);
+    }
+    content.append(fragment);
+    updateLyrics(preview.state.currentTime);
+  }).catch((error) => {
+    if (request !== lyricRequest) return;
+    console.warn("无法读取歌词", error);
+    $("lyricsContent").textContent = "歌词读取失败";
+  });
+}
+
+function updateLyrics(time) {
+  if (!lyricTimed) return;
+  const index = activeLyricIndex(lyricLines, time);
+  if (index === activeLyricLine) return;
+  const content = $("lyricsContent");
+  content.children[activeLyricLine]?.classList.remove("active");
+  content.children[index]?.classList.add("active");
+  activeLyricLine = index;
+  scrollActiveLyric();
+}
+
+function scrollActiveLyric() {
+  if (!$("lyricsDetails").open || activeLyricLine < 0) return;
+  const content = $("lyricsContent");
+  content.scrollTop = content.children[activeLyricLine].offsetTop - content.offsetTop - content.clientHeight / 2;
 }
 
 function renderList() {
@@ -449,6 +509,7 @@ function showSettingsError(error) {
 }
 
 function bindEvents() {
+  $("lyricsDetails").addEventListener("toggle", scrollActiveLyric);
   $("previewToggleButton").addEventListener("click", async () => {
     try { await preview.toggle(); } catch (error) { showError(`试听失败：${error}`); }
   });

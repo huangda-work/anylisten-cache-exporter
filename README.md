@@ -4,7 +4,7 @@
 
 ## 功能
 
-- 扫描完整的本地音乐缓存，查看歌曲信息、试听并批量导出。
+- 扫描完整的本地音乐缓存，查看歌曲信息、试听并批量导出；试听时可展开查看本地歌词，带时间戳的歌词会随播放高亮。
 - 列出数据库中有音乐地址但尚无完整缓存的歌曲；用户选择后可尝试联网下载。
 - 记录和核对当前导出目录中的保存状态，支持单曲保存、只选未保存、取消导出及重试失败歌曲。
 - 已有同名但内容不同的文件会另存，不覆盖原文件。
@@ -32,7 +32,7 @@ npm run desktop:build
 
 ## 发布版本
 
-将 `package.json`、`src-tauri/tauri.conf.json` 和 `src-tauri/Cargo.toml` 的版本号保持一致，推送代码并创建对应的 `v<版本号>` 标签（例如 `v0.1.3`）。随后在 GitHub 上基于该标签发布 Release。发布后，GitHub Actions 会自动构建并把 macOS（Apple Silicon 和 Intel）的 DMG、Windows x64 的 MSI 与免安装 ZIP、Linux x64 的 DEB 和 AppImage 上传到该 Release 的 Assets。版本号不一致时工作流会停止构建。
+将 `package.json`、`src-tauri/tauri.conf.json` 和 `src-tauri/Cargo.toml` 的版本号保持一致，推送代码并创建对应的 `v<版本号>` 标签（例如 `v0.1.4`）。随后在 GitHub 上基于该标签发布 Release。发布后，GitHub Actions 会自动构建并把 macOS（Apple Silicon 和 Intel）的 DMG、Windows x64 的 MSI 与免安装 ZIP、Linux x64 的 DEB 和 AppImage 上传到该 Release 的 Assets。版本号不一致时工作流会停止构建。
 
 Windows 免安装版解压后可直接运行其中的 `.exe`，无需安装 MSI；系统仍需具备 WebView2 Runtime，程序设置会保存在用户的 AppData 中。
 

@@ -37,6 +37,10 @@
         <div id="emptyState" class="empty-state" hidden><i data-lucide="music-2"></i><strong id="emptyTitle">目前没有可导出的音乐</strong></div>
       </main>
       <footer class="footer">
+        <details id="lyricsDetails" class="lyrics-panel" open hidden>
+          <summary>歌词</summary>
+          <div id="lyricsContent" class="lyrics-content">读取中</div>
+        </details>
         <div id="previewBar" class="preview-bar" role="region" aria-label="试听播放器" hidden>
           <button id="previewToggleButton" class="icon-button preview-toggle" type="button" title="暂停试听" aria-label="暂停试听"><i data-lucide="pause"></i></button>
           <div class="preview-info"><strong id="previewTitle"></strong><span id="previewArtist"></span></div>

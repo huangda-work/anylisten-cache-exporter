@@ -13,6 +13,7 @@ fn main() {
             commands::open_saved_track,
             commands::scan_music,
             commands::preview_cached_track,
+            commands::get_cached_lyrics,
             commands::get_saved_statuses,
             commands::export_tracks,
             commands::cancel_export,

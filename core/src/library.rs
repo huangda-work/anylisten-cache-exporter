@@ -21,6 +21,7 @@ pub struct CacheSnapshot {
 #[derive(Debug, Clone)]
 pub struct CachedTrack {
     pub id: String,
+    pub music_id: Option<String>,
     pub title: String,
     pub artist: String,
     pub extension: String,
@@ -113,6 +114,10 @@ pub fn scan(data_root: &Path) -> Result<ScanResult, String> {
                 .and_then(|lookup| lookup.song_for_url(&parsed.url));
             Ok(CachedTrack {
                 id: stem.to_owned(),
+                music_id: lookup
+                    .as_ref()
+                    .and_then(|lookup| lookup.ids_by_url.get(&parsed.url))
+                    .cloned(),
                 title: song.map_or_else(|| format!("缓存 {stem}"), |song| song.0.clone()),
                 artist: song.map_or_else(String::new, |song| song.1.clone()),
                 extension: parsed.extension.clone(),
@@ -158,6 +163,10 @@ pub fn scan(data_root: &Path) -> Result<ScanResult, String> {
         }
         cached.push(CachedTrack {
             id: track.id.clone(),
+            music_id: lookup
+                .as_ref()
+                .and_then(|lookup| lookup.ids_by_url.get(&track.url))
+                .cloned(),
             title: song.map_or_else(|| format!("缓存 {}", track.id), |song| song.0.clone()),
             artist: song.map_or_else(String::new, |song| song.1.clone()),
             extension: track.extension,

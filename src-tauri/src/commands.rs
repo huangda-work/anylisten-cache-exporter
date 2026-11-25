@@ -1,5 +1,6 @@
 use anylisten_core::download::download_remote;
 use anylisten_core::library::{scan, CachedTrack, RemoteTrack, ScanResult};
+use anylisten_core::lyrics::read_lyrics;
 use anylisten_core::platform::{discover_data_root, settings_path, valid_data_root};
 use anylisten_core::records::Settings;
 use anylisten_core::store::{
@@ -284,6 +285,48 @@ pub async fn preview_cached_track(
             .cloned()
             .ok_or("列表已变化，请刷新后重试")?;
         read_cached_audio(&track).map(tauri::ipc::Response::new)
+    })
+    .await
+    .map_err(|error| error.to_string())?
+}
+
+#[tauri::command]
+pub async fn get_cached_lyrics(
+    state: State<'_, Arc<AppState>>,
+    id: String,
+) -> Result<Option<String>, String> {
+    let track_id = id
+        .strip_prefix("cache:")
+        .ok_or("仅完整缓存歌曲可查看歌词")?
+        .to_owned();
+    let state = Arc::clone(state.inner());
+    tauri::async_runtime::spawn_blocking(move || {
+        let music_id = state
+            .scan
+            .lock()
+            .map_err(|error| error.to_string())?
+            .as_ref()
+            .ok_or("请先刷新列表")?
+            .cached
+            .iter()
+            .find(|track| track.id == track_id)
+            .ok_or("列表已变化，请刷新后重试")?
+            .music_id
+            .clone();
+        let Some(music_id) = music_id else {
+            return Ok(None);
+        };
+        let override_root = state
+            .settings
+            .lock()
+            .map_err(|error| error.to_string())?
+            .data_root_override
+            .clone();
+        let data_root = discover_data_root(override_root.as_deref())?;
+        read_lyrics(
+            &data_root.join("AnyListenDatas/anylisten.data.db"),
+            &music_id,
+        )
     })
     .await
     .map_err(|error| error.to_string())?

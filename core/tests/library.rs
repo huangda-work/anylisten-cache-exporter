@@ -49,6 +49,7 @@ fn finds_cached_and_remote_songs_without_duplicates() {
     assert_eq!(result.cached.len(), 1);
     assert_eq!(result.cached[0].title, "缓存歌");
     assert_eq!(result.cached[0].artist, "甲");
+    assert_eq!(result.cached[0].music_id.as_deref(), Some("one"));
     assert_eq!(result.remote.len(), 1);
     assert_eq!(result.remote[0].title, "联网歌");
     assert_eq!(result.unavailable_count, 0);
@@ -61,6 +62,7 @@ fn keeps_unnamed_cache_when_database_is_missing() {
     let result = scan(root.path()).unwrap();
     assert_eq!(result.cached.len(), 1);
     assert_eq!(result.cached[0].title, "缓存 record");
+    assert!(result.cached[0].music_id.is_none());
     assert!(result.remote.is_empty());
 }
 
